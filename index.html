@@ -17,7 +17,13 @@ main{max-width:760px;margin:auto;padding:18px 0 36px}.top{display:flex;justify-c
 h1{font-size:28px;margin:16px 0 4px}h2{font-size:18px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 8px 24px #0002}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.stat{flex:1;min-width:110px;background:var(--panel2);padding:12px;border-radius:13px}.stat strong{display:block;font-size:23px}.progress{height:11px;background:#34445b;border-radius:20px;overflow:hidden;margin:12px 0}.bar{height:100%;background:linear-gradient(90deg,#36bf86,#91e5b7);width:0%}
 label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}input,textarea,select{width:100%;border:1px solid var(--line);background:#111d2d;color:var(--text);border-radius:11px;padding:11px;font:inherit}textarea{min-height:76px;resize:vertical}
-.task{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.task input{width:22px;height:22px;accent-color:var(--green);flex:none;margin:1px 0}.task b{display:block}.task small{display:block;color:var(--muted);margin-top:3px}
+.task{display:flex;align-items:flex-start;gap:11px;padding:14px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.task>input[type=checkbox]{width:22px;height:22px;accent-color:var(--green);flex:none;margin:1px 0}.task-content{flex:1;min-width:0}.task b{display:block}.task small{display:block;color:var(--muted);margin-top:3px}
+.timer-box{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.timer-display{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;min-width:52px;color:var(--blue);background:var(--panel2);padding:6px 10px;border-radius:9px;text-align:center}
+.timer-display.running{color:var(--green)}.timer-display.done{color:var(--gold)}
+.timer-btn{border:0;border-radius:9px;padding:7px 11px;font-weight:700;font-size:12px;cursor:pointer;background:var(--panel2);color:var(--text);border:1px solid var(--line);line-height:1}
+.timer-btn.play{background:var(--green);color:#082016;border-color:transparent}
+.timer-btn:active{opacity:.85}
 button{border:0;border-radius:12px;padding:12px 15px;font-weight:750;font-size:14px;background:var(--green);color:#082016;cursor:pointer}button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}button.danger{background:#512d38;color:#ffdce4}.buttons{display:flex;gap:9px;flex-wrap:wrap}.buttons button{flex:1}
 .tabs{display:flex;gap:8px;overflow:auto;margin:15px 0}.tabs button{white-space:nowrap}.tabs .active{background:var(--green);color:#082016}
 .hidden{display:none}.history-item{border-bottom:1px solid var(--line);padding:11px 0}.history-item:last-child{border:0}.history-item strong{font-size:15px}.tag{display:inline-block;background:var(--panel2);color:var(--muted);border-radius:8px;padding:3px 7px;font-size:12px;margin:4px 4px 0 0}
@@ -50,14 +56,80 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:16px}
   </div>
   <div class="card">
    <h2>Checklist quotidienne</h2>
-   <div class="muted">Coche chaque bloc quand tu l'as terminé. Tu peux adapter la durée selon ta concentration.</div>
+   <div class="muted">Coche chaque bloc quand tu l'as terminé. Active le timer pour chronométrer la durée prévue (tu peux le mettre en pause et le relancer).</div>
    <div id="tasks">
-    <label class="task"><input type="checkbox" data-task="tactics"><span><b>Tactique et calcul — 35 min</b><small>Lichess : motifs tactiques, calcul sans déplacer les pièces, revoir les erreurs.</small></span></label>
-    <label class="task"><input type="checkbox" data-task="games"><span><b>Parties Rapid 10+0 — 60 min</b><small>Environ 2 parties sérieuses. Vérifier les menaces avant chaque coup.</small></span></label>
-    <label class="task"><input type="checkbox" data-task="analysis"><span><b>Analyse personnelle — 55 min</b><small>Analyser d'abord sans moteur, puis vérifier avec Stockfish.</small></span></label>
-    <label class="task"><input type="checkbox" data-task="lesson"><span><b>Cours et stratégie — 35 min</b><small>Un seul thème du jour : ouvertures, plans, attaque ou défense.</small></span></label>
-    <label class="task"><input type="checkbox" data-task="endgames"><span><b>Finales — 25 min</b><small>Opposition, règle du carré, finales de pions, mats élémentaires.</small></span></label>
-    <label class="task"><input type="checkbox" data-task="breaks"><span><b>Pauses et bilan — 30 min</b><small>Pauses, hydratation et quelques lignes de bilan. Ne force pas si tu fatigues.</small></span></label>
+    <div class="task">
+     <input type="checkbox" data-task="tactics">
+     <div class="task-content">
+      <b>Tactique et calcul — 35 min</b>
+      <small>Lichess : motifs tactiques, calcul sans déplacer les pièces, revoir les erreurs.</small>
+      <div class="timer-box" data-timer="tactics" data-mins="35">
+       <span class="timer-display">35:00</span>
+       <button type="button" class="timer-btn play" data-action="toggle">▶ Démarrer</button>
+       <button type="button" class="timer-btn" data-action="reset">↺</button>
+      </div>
+     </div>
+    </div>
+    <div class="task">
+     <input type="checkbox" data-task="games">
+     <div class="task-content">
+      <b>Parties Rapid 10+0 — 60 min</b>
+      <small>Environ 2 parties sérieuses. Vérifier les menaces avant chaque coup.</small>
+      <div class="timer-box" data-timer="games" data-mins="60">
+       <span class="timer-display">60:00</span>
+       <button type="button" class="timer-btn play" data-action="toggle">▶ Démarrer</button>
+       <button type="button" class="timer-btn" data-action="reset">↺</button>
+      </div>
+     </div>
+    </div>
+    <div class="task">
+     <input type="checkbox" data-task="analysis">
+     <div class="task-content">
+      <b>Analyse personnelle — 55 min</b>
+      <small>Analyser d'abord sans moteur, puis vérifier avec Stockfish.</small>
+      <div class="timer-box" data-timer="analysis" data-mins="55">
+       <span class="timer-display">55:00</span>
+       <button type="button" class="timer-btn play" data-action="toggle">▶ Démarrer</button>
+       <button type="button" class="timer-btn" data-action="reset">↺</button>
+      </div>
+     </div>
+    </div>
+    <div class="task">
+     <input type="checkbox" data-task="lesson">
+     <div class="task-content">
+      <b>Cours et stratégie — 35 min</b>
+      <small>Un seul thème du jour : ouvertures, plans, attaque ou défense.</small>
+      <div class="timer-box" data-timer="lesson" data-mins="35">
+       <span class="timer-display">35:00</span>
+       <button type="button" class="timer-btn play" data-action="toggle">▶ Démarrer</button>
+       <button type="button" class="timer-btn" data-action="reset">↺</button>
+      </div>
+     </div>
+    </div>
+    <div class="task">
+     <input type="checkbox" data-task="endgames">
+     <div class="task-content">
+      <b>Finales — 25 min</b>
+      <small>Opposition, règle du carré, finales de pions, mats élémentaires.</small>
+      <div class="timer-box" data-timer="endgames" data-mins="25">
+       <span class="timer-display">25:00</span>
+       <button type="button" class="timer-btn play" data-action="toggle">▶ Démarrer</button>
+       <button type="button" class="timer-btn" data-action="reset">↺</button>
+      </div>
+     </div>
+    </div>
+    <div class="task">
+     <input type="checkbox" data-task="breaks">
+     <div class="task-content">
+      <b>Pauses et bilan — 30 min</b>
+      <small>Pauses, hydratation et quelques lignes de bilan. Ne force pas si tu fatigues.</small>
+      <div class="timer-box" data-timer="breaks" data-mins="30">
+       <span class="timer-display">30:00</span>
+       <button type="button" class="timer-btn play" data-action="toggle">▶ Démarrer</button>
+       <button type="button" class="timer-btn" data-action="reset">↺</button>
+      </div>
+     </div>
+    </div>
    </div>
    <div class="progress"><div class="bar" id="taskBar"></div></div>
    <div class="muted" id="taskCaption">0 / 6 blocs terminés</div>
@@ -99,6 +171,76 @@ const today=()=>new Date().toLocaleDateString('en-CA');
 let records=JSON.parse(localStorage.getItem(KEY)||'{}');
 const taskEls=[...document.querySelectorAll('[data-task]')];
 $('day').value=today();
+
+/* ——— Timers ——— */
+const timers={};
+document.querySelectorAll('[data-timer]').forEach(box=>{
+  const id=box.dataset.timer;
+  const total=Number(box.dataset.mins)*60;
+  const display=box.querySelector('.timer-display');
+  const toggleBtn=box.querySelector('[data-action="toggle"]');
+  const resetBtn=box.querySelector('[data-action="reset"]');
+  timers[id]={remaining:total,total,running:false,interval:null,display,toggleBtn,box};
+
+  function format(s){
+    const m=Math.floor(s/60), sec=s%60;
+    return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+  }
+  function render(){
+    const t=timers[id];
+    display.textContent=format(t.remaining);
+    display.classList.toggle('running',t.running);
+    display.classList.toggle('done',t.remaining===0);
+    if(t.running){
+      toggleBtn.textContent='⏸ Pause';
+      toggleBtn.classList.remove('play');
+    }else if(t.remaining===0){
+      toggleBtn.textContent='✓ Terminé';
+      toggleBtn.classList.remove('play');
+    }else if(t.remaining<t.total){
+      toggleBtn.textContent='▶ Reprendre';
+      toggleBtn.classList.add('play');
+    }else{
+      toggleBtn.textContent='▶ Démarrer';
+      toggleBtn.classList.add('play');
+    }
+  }
+  function tick(){
+    const t=timers[id];
+    if(t.remaining<=0){stop();return}
+    t.remaining--;
+    render();
+    if(t.remaining===0){
+      stop();
+      try{navigator.vibrate?.(200)}catch(e){}
+    }
+  }
+  function start(){
+    const t=timers[id];
+    if(t.remaining<=0)return;
+    t.running=true;
+    t.interval=setInterval(tick,1000);
+    render();
+  }
+  function stop(){
+    const t=timers[id];
+    t.running=false;
+    if(t.interval){clearInterval(t.interval);t.interval=null}
+    render();
+  }
+  toggleBtn.addEventListener('click',()=>{
+    const t=timers[id];
+    if(t.running)stop();
+    else start();
+  });
+  resetBtn.addEventListener('click',()=>{
+    stop();
+    timers[id].remaining=timers[id].total;
+    render();
+  });
+  render();
+});
+
 function current(){return {date:$('day').value,elo:$('elo').value,checks:Object.fromEntries(taskEls.map(x=>[x.dataset.task,x.checked])),games:$('gamesCount').value,puzzles:$('puzzles').value,weakness:$('weakness').value,notes:$('notes').value}}
 function fill(r){r=r||{};$('elo').value=r.elo||'';$('gamesCount').value=r.games??'';$('puzzles').value=r.puzzles??'';$('weakness').value=r.weakness||'';$('notes').value=r.notes||'';taskEls.forEach(x=>x.checked=!!r.checks?.[x.dataset.task]);updateProgress()}
 function save(silent=false){const r=current();if(!r.date)return;records[r.date]=r;localStorage.setItem(KEY,JSON.stringify(records));updateProgress();renderHistory();renderStats();if(!silent)$('saveMsg').textContent='Séance enregistrée sur cet appareil ✓'}
