@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cap 1500">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Cap 1500 — Journal d'échecs</title>
+<style>
+:root{color-scheme:dark;--bg:#101827;--panel:#192538;--panel2:#223149;--text:#f4f7fb;--muted:#a9b7ca;--green:#53d69a;--blue:#79aefc;--gold:#f3c969;--line:#30425b}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#101827,#14243a);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
+main{max-width:760px;margin:auto;padding:18px 0 36px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;letter-spacing:.3px}.pill{font-size:12px;color:#092016;background:var(--green);padding:5px 9px;border-radius:20px;font-weight:800}
+h1{font-size:28px;margin:16px 0 4px}h2{font-size:18px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 8px 24px #0002}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.stat{flex:1;min-width:110px;background:var(--panel2);padding:12px;border-radius:13px}.stat strong{display:block;font-size:23px}.progress{height:11px;background:#34445b;border-radius:20px;overflow:hidden;margin:12px 0}.bar{height:100%;background:linear-gradient(90deg,#36bf86,#91e5b7);width:0%}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}input,textarea,select{width:100%;border:1px solid var(--line);background:#111d2d;color:var(--text);border-radius:11px;padding:11px;font:inherit}textarea{min-height:76px;resize:vertical}
+.task{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.task input{width:22px;height:22px;accent-color:var(--green);flex:none;margin:1px 0}.task b{display:block}.task small{display:block;color:var(--muted);margin-top:3px}
+button{border:0;border-radius:12px;padding:12px 15px;font-weight:750;font-size:14px;background:var(--green);color:#082016;cursor:pointer}button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}button.danger{background:#512d38;color:#ffdce4}.buttons{display:flex;gap:9px;flex-wrap:wrap}.buttons button{flex:1}
+.tabs{display:flex;gap:8px;overflow:auto;margin:15px 0}.tabs button{white-space:nowrap}.tabs .active{background:var(--green);color:#082016}
+.hidden{display:none}.history-item{border-bottom:1px solid var(--line);padding:11px 0}.history-item:last-child{border:0}.history-item strong{font-size:15px}.tag{display:inline-block;background:var(--panel2);color:var(--muted);border-radius:8px;padding:3px 7px;font-size:12px;margin:4px 4px 0 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:16px}
+</style>
+</head>
+<body>
+<main>
+ <div class="top"><div class="brand">♟ CAP 1500</div><span class="pill">100 % GRATUIT</span></div>
+ <h1>Ton journal d'entraînement</h1>
+ <div class="muted">Objectif : 1 500 Elo Rapid · Départ indicatif : 950 · Format : 10+0</div>
+ <div class="tabs">
+  <button class="active" data-tab="today">Aujourd'hui</button>
+  <button class="secondary" data-tab="history">Historique</button>
+  <button class="secondary" data-tab="stats">Progression</button>
+ </div>
+ <section id="today">
+  <div class="card">
+   <div class="row">
+    <div style="flex:1"><label for="day">Date de la séance</label><input id="day" type="date"></div>
+    <div style="flex:1"><label for="elo">Elo Rapid du jour</label><input id="elo" type="number" min="0" max="4000" placeholder="ex. 950"></div>
+   </div>
+   <div class="row" style="margin-top:12px">
+    <div class="stat"><span class="muted">Objectif</span><strong>1 500</strong><span class="muted">Elo Rapid</span></div>
+    <div class="stat"><span class="muted">Temps prévu</span><strong>4 h</strong><span class="muted">240 minutes</span></div>
+    <div class="stat"><span class="muted">Progression</span><strong id="gain">—</strong><span class="muted">depuis 950</span></div>
+   </div>
+   <div class="progress"><div class="bar" id="eloBar"></div></div>
+   <div class="muted" id="eloCaption">Renseigne ton Elo pour suivre ta progression vers 1 500.</div>
+  </div>
+  <div class="card">
+   <h2>Checklist quotidienne</h2>
+   <div class="muted">Coche chaque bloc quand tu l'as terminé. Tu peux adapter la durée selon ta concentration.</div>
+   <div id="tasks">
+    <label class="task"><input type="checkbox" data-task="tactics"><span><b>Tactique et calcul — 35 min</b><small>Lichess : motifs tactiques, calcul sans déplacer les pièces, revoir les erreurs.</small></span></label>
+    <label class="task"><input type="checkbox" data-task="games"><span><b>Parties Rapid 10+0 — 60 min</b><small>Environ 2 parties sérieuses. Vérifier les menaces avant chaque coup.</small></span></label>
+    <label class="task"><input type="checkbox" data-task="analysis"><span><b>Analyse personnelle — 55 min</b><small>Analyser d'abord sans moteur, puis vérifier avec Stockfish.</small></span></label>
+    <label class="task"><input type="checkbox" data-task="lesson"><span><b>Cours et stratégie — 35 min</b><small>Un seul thème du jour : ouvertures, plans, attaque ou défense.</small></span></label>
+    <label class="task"><input type="checkbox" data-task="endgames"><span><b>Finales — 25 min</b><small>Opposition, règle du carré, finales de pions, mats élémentaires.</small></span></label>
+    <label class="task"><input type="checkbox" data-task="breaks"><span><b>Pauses et bilan — 30 min</b><small>Pauses, hydratation et quelques lignes de bilan. Ne force pas si tu fatigues.</small></span></label>
+   </div>
+   <div class="progress"><div class="bar" id="taskBar"></div></div>
+   <div class="muted" id="taskCaption">0 / 6 blocs terminés</div>
+  </div>
+  <div class="card">
+   <h2>Résultats du jour</h2>
+   <div class="row">
+    <div style="flex:1"><label for="gamesCount">Parties jouées</label><input id="gamesCount" type="number" min="0" placeholder="0"></div>
+    <div style="flex:1"><label for="puzzles">Puzzles travaillés</label><input id="puzzles" type="number" min="0" placeholder="0"></div>
+   </div>
+   <label for="weakness">Difficulté principale repérée</label>
+   <select id="weakness">
+    <option value="">Choisir…</option><option>Pièces laissées en prise</option><option>Erreurs de calcul</option><option>Menaces adverses non vues</option><option>Mauvais plans stratégiques</option><option>Gestion du temps</option><option>Finales</option><option>Ouvertures</option><option>Aucune difficulté particulière</option>
+   </select>
+   <label for="notes">Notes / leçon à retenir</label>
+   <textarea id="notes" placeholder="Ex. J'ai oublié de vérifier les menaces adverses après mon 15e coup…"></textarea>
+   <div class="buttons" style="margin-top:14px"><button id="save">Enregistrer la journée</button><button class="secondary" id="reset">Réinitialiser les cases</button></div>
+   <div class="muted" id="saveMsg" style="margin-top:9px" aria-live="polite"></div>
+  </div>
+ </section>
+ <section id="history" class="hidden">
+  <div class="card"><h2>Historique des séances</h2><div class="muted">Tes données restent enregistrées sur cet appareil.</div><div id="historyList" style="margin-top:12px"></div></div>
+  <div class="card"><h2>Exporter tes données</h2><p class="muted">Télécharge une copie de ton historique pour le conserver ou me l'envoyer pour analyser ta progression.</p><div class="buttons"><button id="exportJson">Exporter en JSON</button><button class="secondary" id="exportCsv">Exporter en CSV</button></div></div>
+ </section>
+ <section id="stats" class="hidden">
+  <div class="card"><h2>Ta progression</h2><div class="row">
+   <div class="stat"><span class="muted">Dernier Elo</span><strong id="lastElo">—</strong></div>
+   <div class="stat"><span class="muted">Séances enregistrées</span><strong id="daysDone">0</strong></div>
+   <div class="stat"><span class="muted">Blocs terminés</span><strong id="blocksDone">0</strong></div>
+  </div><div style="margin-top:16px"><div class="muted">Évolution de ton Elo (selon les séances enregistrées)</div><div id="eloHistory" style="margin-top:10px"></div></div></div>
+  <div class="card"><h2>Rappel de méthode</h2><p class="muted">L'Elo peut varier d'un jour à l'autre. Évalue aussi ta progression avec la diminution des pièces données, la qualité de tes analyses et ta capacité à repérer les menaces.</p></div>
+ </section>
+ <footer>Cap 1500 · Entraînement gratuit · Sauvegarde locale sur ton appareil</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='cap1500-v1';
+const today=()=>new Date().toLocaleDateString('en-CA');
+let records=JSON.parse(localStorage.getItem(KEY)||'{}');
+const taskEls=[...document.querySelectorAll('[data-task]')];
+$('day').value=today();
+function current(){return {date:$('day').value,elo:$('elo').value,checks:Object.fromEntries(taskEls.map(x=>[x.dataset.task,x.checked])),games:$('gamesCount').value,puzzles:$('puzzles').value,weakness:$('weakness').value,notes:$('notes').value}}
+function fill(r){r=r||{};$('elo').value=r.elo||'';$('gamesCount').value=r.games??'';$('puzzles').value=r.puzzles??'';$('weakness').value=r.weakness||'';$('notes').value=r.notes||'';taskEls.forEach(x=>x.checked=!!r.checks?.[x.dataset.task]);updateProgress()}
+function save(silent=false){const r=current();if(!r.date)return;records[r.date]=r;localStorage.setItem(KEY,JSON.stringify(records));updateProgress();renderHistory();renderStats();if(!silent)$('saveMsg').textContent='Séance enregistrée sur cet appareil ✓'}
+function updateProgress(){
+ const done=taskEls.filter(x=>x.checked).length;$('taskBar').style.width=(done/6*100)+'%';$('taskCaption').textContent=done+' / 6 blocs terminés';
+ const e=Number($('elo').value);if(e){$('gain').textContent=(e-950>=0?'+':'')+(e-950);$('eloBar').style.width=Math.max(0,Math.min(100,(e-950)/550*100))+'%';$('eloCaption').textContent=e>=1500?'Objectif atteint ! Continue à consolider ton niveau.':(1500-e)+' points te séparent de ton objectif.'}else{$('gain').textContent='—';$('eloBar').style.width='0%';$('eloCaption').textContent='Renseigne ton Elo pour suivre ta progression vers 1 500.'}
+}
+function loadDay(){fill(records[$('day').value]);$('saveMsg').textContent=''}
+function renderHistory(){const list=Object.values(records).sort((a,b)=>b.date.localeCompare(a.date));$('historyList').innerHTML=list.length?list.map(r=>`<div class="history-item"><strong>${r.date}</strong><div class="tag">${r.elo? r.elo+' Elo':'Elo non renseigné'}</div><div class="tag">${Object.values(r.checks||{}).filter(Boolean).length}/6 blocs</div><div class="tag">${r.games||0} parties</div><div class="muted">${(r.weakness||'Aucune difficulté indiquée').replaceAll('<','&lt;')}</div></div>`).join(''):'<p class="muted">Aucune séance enregistrée pour le moment.</p>'}
+function renderStats(){const arr=Object.values(records).sort((a,b)=>a.date.localeCompare(b.date));const last=[...arr].reverse().find(r=>r.elo);$('lastElo').textContent=last?.elo||'—';$('daysDone').textContent=arr.length;$('blocksDone').textContent=arr.reduce((n,r)=>n+Object.values(r.checks||{}).filter(Boolean).length,0);$('eloHistory').innerHTML=arr.filter(r=>r.elo).map(r=>`<div class="history-item"><strong>${r.date}</strong><span style="float:right;font-weight:800">${r.elo} Elo</span></div>`).join('')||'<p class="muted">Ajoute ton Elo et enregistre tes séances pour voir ton évolution.</p>'}
+taskEls.forEach(x=>x.addEventListener('change',()=>{updateProgress();save(true)}));
+['elo','gamesCount','puzzles','weakness','notes'].forEach(id=>$(id).addEventListener('change',()=>{updateProgress();save(true)}));
+$('day').addEventListener('change',loadDay);
+$('save').addEventListener('click',()=>save(false));
+$('reset').addEventListener('click',()=>{taskEls.forEach(x=>x.checked=false);updateProgress();save(true);$('saveMsg').textContent='Cases réinitialisées.'});
+document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('active',b===btn);b.classList.toggle('secondary',b!==btn)});['today','history','stats'].forEach(id=>$(id).classList.toggle('hidden',id!==btn.dataset.tab));renderHistory();renderStats()}));
+function download(name,content,type){const a=document.createElement('a');const url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+$('exportJson').onclick=()=>download('cap1500-historique.json',JSON.stringify(records,null,2),'application/json');
+$('exportCsv').onclick=()=>{const rows=[['date','elo','parties','puzzles','blocs_termines','difficulte','notes']];Object.values(records).sort((a,b)=>a.date.localeCompare(b.date)).forEach(r=>rows.push([r.date,r.elo,r.games,r.puzzles,Object.values(r.checks||{}).filter(Boolean).length,r.weakness,r.notes]));const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(';')).join('\n');download('cap1500-historique.csv','\ufeff'+csv,'text/csv')};
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+loadDay();renderHistory();renderStats();
+</script>
+</body></html>
