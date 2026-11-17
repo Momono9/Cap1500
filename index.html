@@ -167,12 +167,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:16px}
 <script>
 const $=id=>document.getElementById(id);
 const KEY='cap1500-v1';
+const TIMER_KEY='cap1500-timers-v1';
 const today=()=>new Date().toLocaleDateString('en-CA');
 let records=JSON.parse(localStorage.getItem(KEY)||'{}');
 const taskEls=[...document.querySelectorAll('[data-task]')];
 $('day').value=today();
 
-/* ——— Wake Lock (garde l'écran allumé) ——— */
+/* ——— Wake Lock ——— */
 let wakeLock=null;
 async function requestWakeLock(){
   try{
@@ -186,34 +187,67 @@ function releaseWakeLock(){
   if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}
 }
 function updateWakeLock(){
-  const anyRunning=Object.values(timers).some(t=>t.running && t.remaining>0);
+  const anyRunning=Object.values(timers).some(t=>t.running && getRemaining(t)>0);
   if(anyRunning) requestWakeLock();
   else releaseWakeLock();
 }
 
-/* ——— Timers (horodatage réel + Wake Lock) ——— */
+/* ——— Timers (persistés + horodatage réel) ——— */
 const timers={};
+function getRemaining(t){
+  if(t.running && t.endAt) return Math.max(0,Math.round((t.endAt-Date.now())/1000));
+  return t.remaining;
+}
+function format(s){
+  s=Math.max(0,Math.floor(s));
+  const m=Math.floor(s/60), sec=s%60;
+  return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function saveTimers(){
+  const data={};
+  Object.keys(timers).forEach(id=>{
+    const t=timers[id];
+    data[id]={
+      remaining:getRemaining(t),
+      running:t.running && getRemaining(t)>0,
+      endAt:t.running ? t.endAt : null,
+      total:t.total
+    };
+  });
+  localStorage.setItem(TIMER_KEY,JSON.stringify(data));
+}
+function loadTimers(){
+  try{
+    return JSON.parse(localStorage.getItem(TIMER_KEY)||'{}');
+  }catch(e){return {}}
+}
+
 document.querySelectorAll('[data-timer]').forEach(box=>{
   const id=box.dataset.timer;
   const total=Number(box.dataset.mins)*60;
   const display=box.querySelector('.timer-display');
   const toggleBtn=box.querySelector('[data-action="toggle"]');
   const resetBtn=box.querySelector('[data-action="reset"]');
-  timers[id]={remaining:total,total,running:false,interval:null,endAt:null,display,toggleBtn};
 
-  function format(s){
-    s=Math.max(0,Math.floor(s));
-    const m=Math.floor(s/60), sec=s%60;
-    return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+  const saved=loadTimers()[id]||{};
+  let remaining=typeof saved.remaining==='number' ? saved.remaining : total;
+  let running=!!saved.running;
+  let endAt=saved.endAt||null;
+
+  // Si le timer était en cours, recalculer avec l'heure réelle
+  if(running && endAt){
+    remaining=Math.max(0,Math.round((endAt-Date.now())/1000));
+    if(remaining<=0){running=false;endAt=null}
+  }else{
+    endAt=null;
+    running=false;
   }
-  function getRemaining(){
-    const t=timers[id];
-    if(t.running && t.endAt) return Math.max(0,Math.round((t.endAt-Date.now())/1000));
-    return t.remaining;
-  }
+
+  timers[id]={remaining,total,running,interval:null,endAt,display,toggleBtn};
+
   function render(){
     const t=timers[id];
-    const rem=getRemaining();
+    const rem=getRemaining(t);
     t.remaining=rem;
     display.textContent=format(rem);
     display.classList.toggle('running',t.running && rem>0);
@@ -233,16 +267,19 @@ document.querySelectorAll('[data-timer]').forEach(box=>{
       toggleBtn.classList.add('play');
     }
   }
+
   function tick(){
     const t=timers[id];
     if(!t.running)return;
-    if(getRemaining()<=0){
+    if(getRemaining(t)<=0){
       stop();
       try{navigator.vibrate?.(200)}catch(e){}
       return;
     }
     render();
+    saveTimers();
   }
+
   function start(){
     const t=timers[id];
     if(t.remaining<=0)return;
@@ -251,17 +288,21 @@ document.querySelectorAll('[data-timer]').forEach(box=>{
     if(t.interval)clearInterval(t.interval);
     t.interval=setInterval(tick,250);
     render();
+    saveTimers();
     updateWakeLock();
   }
+
   function stop(){
     const t=timers[id];
-    t.remaining=getRemaining();
+    t.remaining=getRemaining(t);
     t.running=false;
     t.endAt=null;
     if(t.interval){clearInterval(t.interval);t.interval=null}
     render();
+    saveTimers();
     updateWakeLock();
   }
+
   toggleBtn.addEventListener('click',()=>{
     if(timers[id].running) stop(); else start();
   });
@@ -269,26 +310,33 @@ document.querySelectorAll('[data-timer]').forEach(box=>{
     stop();
     timers[id].remaining=timers[id].total;
     render();
+    saveTimers();
   });
+
+  // Si le timer était en cours au chargement, on le relance
+  if(running && remaining>0){
+    timers[id].running=true;
+    timers[id].endAt=endAt;
+    timers[id].interval=setInterval(tick,250);
+  }
   render();
 });
 
-// Quand on revient sur l'app → rattrapage du temps réel
+// Quand on revient sur l'app
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
     Object.keys(timers).forEach(id=>{
       const t=timers[id];
       if(t.running){
-        const rem=Math.max(0,Math.round((t.endAt-Date.now())/1000));
+        const rem=getRemaining(t);
         t.remaining=rem;
         if(rem<=0){
           t.running=false; t.endAt=null;
           if(t.interval){clearInterval(t.interval);t.interval=null}
           try{navigator.vibrate?.(200)}catch(e){}
         }
-        // re-render rapide
+        // re-render
         const display=t.display, toggleBtn=t.toggleBtn;
-        const format=s=>{s=Math.max(0,Math.floor(s));const m=Math.floor(s/60),sec=s%60;return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')};
         display.textContent=format(rem);
         display.classList.toggle('running',t.running&&rem>0);
         display.classList.toggle('done',rem===0);
@@ -297,9 +345,13 @@ document.addEventListener('visibilitychange',()=>{
         else{toggleBtn.textContent='▶ Reprendre';toggleBtn.classList.add('play')}
       }
     });
+    saveTimers();
     updateWakeLock();
   }
 });
+
+// Sauvegarde périodique de sécurité
+setInterval(saveTimers,5000);
 
 function current(){return {date:$('day').value,elo:$('elo').value,checks:Object.fromEntries(taskEls.map(x=>[x.dataset.task,x.checked])),games:$('gamesCount').value,puzzles:$('puzzles').value,weakness:$('weakness').value,notes:$('notes').value}}
 function fill(r){r=r||{};$('elo').value=r.elo||'';$('gamesCount').value=r.games??'';$('puzzles').value=r.puzzles??'';$('weakness').value=r.weakness||'';$('notes').value=r.notes||'';taskEls.forEach(x=>x.checked=!!r.checks?.[x.dataset.task]);updateProgress()}
@@ -322,5 +374,6 @@ $('exportJson').onclick=()=>download('cap1500-historique.json',JSON.stringify(re
 $('exportCsv').onclick=()=>{const rows=[['date','elo','parties','puzzles','blocs_termines','difficulte','notes']];Object.values(records).sort((a,b)=>a.date.localeCompare(b.date)).forEach(r=>rows.push([r.date,r.elo,r.games,r.puzzles,Object.values(r.checks||{}).filter(Boolean).length,r.weakness,r.notes]));const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(';')).join('\n');download('cap1500-historique.csv','\ufeff'+csv,'text/csv')};
 if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 loadDay();renderHistory();renderStats();
+updateWakeLock();
 </script>
 </body></html>
